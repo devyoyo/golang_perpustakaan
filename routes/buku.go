@@ -102,6 +102,9 @@ func PostBuku(c *gin.Context) {
 			"error":   err,
 			"message": "failed created Buku",
 		})
+
+		c.Abort()
+		return
 	} else {
 		Buku := models.Buku{
 			Judul:     RequestBuku.Judul,

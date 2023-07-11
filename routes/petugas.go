@@ -1,13 +1,13 @@
 package routes
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"project_perpustakaan/config"
 	"project_perpustakaan/models"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func GetPetugas(c *gin.Context) {
@@ -82,6 +82,9 @@ func PostPetugas(c *gin.Context) {
 	if RequestPetugas.Password == "" {
 		err["password"] = "password is required"
 	}
+	if RequestPetugas.Role <= 0 {
+		err["role"] = "role is required"
+	}
 
 	if len(err) > 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{
@@ -89,12 +92,39 @@ func PostPetugas(c *gin.Context) {
 			"message": "failed created Petugas",
 		})
 	} else {
-		hash, _ := HashPassword(RequestPetugas.Password)
+		var PetugasModel models.Petugas
+
+		last_petugas := config.DB.Last(&PetugasModel)
+
+		var Nip string
+
+		if last_petugas.Error == nil {
+			last_id := PetugasModel.ID
+			last_id++
+
+			Nip = fmt.Sprintf("PTGS%04d", last_id)
+		} else {
+			Nip = "PTGS0001"
+		}
+
+		hash, err := models.HashPassword(RequestPetugas.Password)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed Hash Password",
+				"error":   err.Error(),
+			})
+
+			c.Abort()
+			return
+		}
 
 		Petugas := models.Petugas{
 			Name:     RequestPetugas.Name,
 			Username: RequestPetugas.Username,
+			Role:     RequestPetugas.Role,
 			Password: hash,
+			Nip:      Nip,
 		}
 
 		config.DB.Create(&Petugas)
@@ -124,7 +154,7 @@ func PutPetugas(c *gin.Context) {
 		return
 	}
 
-	var RequestPetugas models.Petugas
+	var RequestPetugas models.RequestPetugas
 
 	c.BindJSON(&RequestPetugas)
 
@@ -146,7 +176,17 @@ func PutPetugas(c *gin.Context) {
 			"message": "failed created Petugas",
 		})
 	} else {
-		hash, _ := HashPassword(RequestPetugas.Password)
+		hash, err := models.HashPassword(RequestPetugas.Password)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed Hash Password",
+				"error":   err.Error(),
+			})
+
+			c.Abort()
+			return
+		}
 
 		update_Petugas := models.Petugas{
 			Name:     RequestPetugas.Name,
@@ -197,9 +237,4 @@ func DeletePetugas(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "delete success",
 	})
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
 }

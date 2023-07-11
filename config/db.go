@@ -93,11 +93,15 @@ func Migrate(c *gin.Context) {
 			Name:     "iksan",
 			Username: "user_iksan",
 			Password: "iksan_password",
+			Nip:      "PTGS0001",
+			Role:     1,
 		},
 		{
 			Name:     "Rudi",
 			Username: "user_rudi",
 			Password: "rudi_password",
+			Nip:      "PTGS0002",
+			Role:     2,
 		},
 	}
 

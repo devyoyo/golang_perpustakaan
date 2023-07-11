@@ -2,6 +2,7 @@ package main
 
 import (
 	"project_perpustakaan/config"
+	"project_perpustakaan/middleware"
 	"project_perpustakaan/routes"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func main() {
 
 	api := r.Group("api")
 	{
-		anggota := api.Group("anggota")
+		anggota := api.Group("anggota").Use(middleware.Auth())
 		{
 			anggota.GET("/", routes.GetAnggota)
 			anggota.GET("/:id", routes.GetAnggotaById)
@@ -32,7 +33,7 @@ func main() {
 			Buku.DELETE("/:id", routes.DeleteBuku)
 		}
 
-		Petugas := api.Group("petugas")
+		Petugas := api.Group("petugas").Use(middleware.Auth())
 		{
 			Petugas.GET("/", routes.GetPetugas)
 			Petugas.GET("/:id", routes.GetPetugasById)
@@ -40,9 +41,20 @@ func main() {
 			Petugas.PUT("/:id", routes.PutPetugas)
 			Petugas.DELETE("/:id", routes.DeletePetugas)
 		}
-	}
 
-	r.GET("/migrate", config.Migrate)
+		loaning := api.Group("peminjaman").Use(middleware.Auth())
+		{
+			loaning.GET("/", routes.GetLoan)
+			loaning.GET("/anggota/:id", routes.GetLoanByAnggota)
+			loaning.GET("/petugas/:id", routes.GetLoanByPetugas)
+			loaning.GET("/:id", routes.GetLoanByID)
+			loaning.POST("/", routes.PostLoanByPetugas)
+			loaning.GET("/back/:id", routes.BackLoan)
+		}
+
+		api.POST("/generate_token", routes.GenerateToken)
+		api.GET("/migrate", config.Migrate)
+	}
 
 	r.Run(":8081")
 }

@@ -77,10 +77,14 @@ func GetAnggotaById(c *gin.Context) {
 }
 
 func PostAnggota(c *gin.Context) {
-	name := c.PostForm("name")
-	email := c.PostForm("email")
-	no_telp := c.PostForm("no_telp")
-	alamat := c.PostForm("alamat")
+	var RequestAnggota models.RequestAnggota
+
+	c.BindJSON(&RequestAnggota)
+
+	name := RequestAnggota.Name
+	email := RequestAnggota.Email
+	no_telp := RequestAnggota.NoTelp
+	alamat := RequestAnggota.Alamat
 
 	err := map[string]string{}
 
@@ -131,7 +135,7 @@ func PostAnggota(c *gin.Context) {
 		config.DB.Create(&anggota)
 
 		c.JSON(http.StatusCreated, gin.H{
-			"data":    anggota,
+			"data":    RequestAnggota,
 			"message": "success created anggota",
 		})
 	}
