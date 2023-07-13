@@ -412,7 +412,7 @@ func BackLoan(c *gin.Context) {
 
 	var Peminjaman models.Peminjaman
 
-	data := config.DB.Preload("PeminjamanDetail").Where("id = ?", id).First(&Peminjaman)
+	data := config.DB.Preload(clause.Associations).Where("id = ?", id).First(&Peminjaman)
 
 	if data.Error != nil {
 		log.Printf(data.Error.Error())
@@ -442,9 +442,9 @@ func BackLoan(c *gin.Context) {
 
 		total_stok = Buku.Stok + 1
 
-		log.Println(total_stok, " : ", Buku.Stok)
+		log.Println(data.BukuID, ":", total_stok, " : ", Buku.Stok)
 
-		updateData := config.DB.Model(&models.Buku{}).Where("id = ?", data.ID).Update("stok", total_stok)
+		updateData := config.DB.Model(&models.Buku{}).Where("id = ?", data.BukuID).Update("stok", total_stok)
 
 		if updateData.Error != nil {
 			log.Println(updateData.Error.Error())
@@ -454,5 +454,78 @@ func BackLoan(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success pengembalian buku",
 		"data":    Peminjaman,
+	})
+}
+
+func GetLoanByBuku(c *gin.Context) {
+	id := c.Param("id")
+
+	var Buku models.Buku
+
+	dataBuku := config.DB.First(&Buku, "id = ?", id)
+
+	if dataBuku.Error != nil {
+		log.Printf(dataBuku.Error.Error())
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  http.StatusNotFound,
+			"message": "data not found",
+		})
+
+		c.Abort()
+
+		return
+	}
+
+	ResponseBuku := models.ResponseBuku{
+		ID:        Buku.ID,
+		Judul:     Buku.Judul,
+		Kategori:  Buku.Kategori,
+		Tahun:     Buku.Tahun,
+		Stok:      Buku.Stok,
+		Pengarang: Buku.Pengarang,
+		Penerbit:  Buku.Penerbit,
+	}
+
+	PeminjamanDetail := []models.PeminjamanDetail{}
+
+	config.DB.Preload(clause.Associations).Find(&PeminjamanDetail, "buku_id = ?", id)
+
+	ResponsePeminjamanByBuku := []models.ResponsePeminjamanByBuku{}
+
+	for _, data := range PeminjamanDetail {
+		var Anggota models.Anggota
+		var Petugas models.Petugas
+
+		config.DB.First(&Anggota, "id = ?", data.Peminjaman.AnggotaID)
+		config.DB.First(&Petugas, "id = ?", data.Peminjaman.PetugasID)
+
+		resp := models.ResponsePeminjamanByBuku{
+			CodeOrder:      data.Peminjaman.CodeOrder,
+			TanggalPinjam:  data.Peminjaman.TanggalPinjam,
+			TanggalKembali: data.Peminjaman.TanggalKembali,
+			AnggotaID:      data.Peminjaman.AnggotaID,
+			PetugasID:      data.Peminjaman.PetugasID,
+			Anggota: models.ResponseAnggotaPeminjaman{
+				Name:      Anggota.Name,
+				Email:     Anggota.Email,
+				NoAnggota: Anggota.NoAnggota,
+			},
+			Petugas: models.ResponsePetugasPeminjaman{
+				Name:     Petugas.Name,
+				Username: Petugas.Username,
+				Nip:      Petugas.Nip,
+			},
+		}
+
+		ResponsePeminjamanByBuku = append(ResponsePeminjamanByBuku, resp)
+	}
+
+	config.DB.Find(&PeminjamanDetail, "buku_id = ?", id)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "success pengembalian buku",
+		"data_buku": ResponseBuku,
+		"data":      ResponsePeminjamanByBuku,
 	})
 }

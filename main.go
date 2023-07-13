@@ -28,9 +28,13 @@ func main() {
 		{
 			Buku.GET("/", routes.GetBuku)
 			Buku.GET("/:id", routes.GetBukuById)
-			Buku.POST("/", routes.PostBuku)
-			Buku.PUT("/:id", routes.PutBuku)
-			Buku.DELETE("/:id", routes.DeleteBuku)
+		}
+
+		BukuAuth := api.Group("buku").Use(middleware.Auth())
+		{
+			BukuAuth.POST("/", routes.PostBuku)
+			BukuAuth.PUT("/:id", routes.PutBuku)
+			BukuAuth.DELETE("/:id", routes.DeleteBuku)
 		}
 
 		Petugas := api.Group("petugas").Use(middleware.Auth())
@@ -47,6 +51,7 @@ func main() {
 			loaning.GET("/", routes.GetLoan)
 			loaning.GET("/anggota/:id", routes.GetLoanByAnggota)
 			loaning.GET("/petugas/:id", routes.GetLoanByPetugas)
+			loaning.GET("/buku/:id", routes.GetLoanByBuku)
 			loaning.GET("/:id", routes.GetLoanByID)
 			loaning.POST("/", routes.PostLoanByPetugas)
 			loaning.GET("/back/:id", routes.BackLoan)

@@ -27,6 +27,17 @@ type ResponsePeminjaman struct {
 	PeminjamanDetail []ResponsePeminjamanDetail `json:"detail"`
 }
 
+type ResponsePeminjamanByBuku struct {
+	ID             uint                      `json:"id"`
+	CodeOrder      string                    `json:"code_order"`
+	TanggalPinjam  string                    `json:"tanggal_pinjam"`
+	TanggalKembali string                    `json:"tanggal_kembali"`
+	AnggotaID      uint                      `json:"anggota_id"`
+	PetugasID      uint                      `json:"petugas_id"`
+	Anggota        ResponseAnggotaPeminjaman `json:"anggota"`
+	Petugas        ResponsePetugasPeminjaman `json:"petugas"`
+}
+
 type RequestPeminjaman struct {
 	CodeOrder        string                    `json:"code_order"`
 	TanggalPinjam    string                    `json:"tanggal_pinjam"`

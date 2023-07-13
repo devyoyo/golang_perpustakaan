@@ -22,3 +22,7 @@ type RequestPeminjamanDetail struct {
 	BukuID       uint `json:"buku_id"`
 	PeminjamanID uint `json:"peminjaman_id"`
 }
+
+type PeminjamanDetailByBukuResponse struct {
+	Peminjaman ResponsePeminjamanByBuku `json:"peminjaman"`
+}
