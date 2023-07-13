@@ -19,6 +19,12 @@ type ResponseAnggota struct {
 	AnggotaDetailResponse AnggotaDetailResponse `json:"detail"`
 }
 
+type ResponseAnggotaPeminjaman struct {
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	NoAnggota string `json:"no_anggota"`
+}
+
 type RequestAnggota struct {
 	Name   string `json:"name"`
 	Email  string `json:"email"`

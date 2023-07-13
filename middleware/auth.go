@@ -21,7 +21,7 @@ func Auth() gin.HandlerFunc {
 		}
 
 		// validate token
-		_, _, err := auth.ValidateToken(tokenString)
+		nip, _, err := auth.ValidateToken(tokenString)
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -32,6 +32,8 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		c.Set("x-nip", nip)
 
 		c.Next()
 

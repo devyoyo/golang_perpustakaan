@@ -23,11 +23,11 @@ func GenerateToken(c *gin.Context) {
 		return
 	}
 
-	// check email
-	checkNip := config.DB.Where("email = ?", reqToken.Nip).First(&petugas)
+	// check nip
+	checkNip := config.DB.Where("nip = ?", reqToken.Nip).First(&petugas)
 	if checkNip.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "email not found",
+			"message": "nip not found",
 			"error":   checkNip.Error.Error(),
 		})
 

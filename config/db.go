@@ -88,18 +88,21 @@ func Migrate(c *gin.Context) {
 		},
 	}
 
+	hash_1, _ := models.HashPassword("iksan_password")
+	hash_2, _ := models.HashPassword("rudi_password")
+
 	var Petugas = []models.Petugas{
 		{
 			Name:     "iksan",
 			Username: "user_iksan",
-			Password: "iksan_password",
+			Password: hash_1,
 			Nip:      "PTGS0001",
 			Role:     1,
 		},
 		{
 			Name:     "Rudi",
 			Username: "user_rudi",
-			Password: "rudi_password",
+			Password: hash_2,
 			Nip:      "PTGS0002",
 			Role:     2,
 		},
