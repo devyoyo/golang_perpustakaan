@@ -20,18 +20,33 @@ func GetLoan(c *gin.Context) {
 	ResponsePeminjaman := []models.ResponsePeminjaman{}
 
 	// config.DB.Find(&departments)
-	config.DB.Preload(clause.Associations).Find(&Peminjaman)
+	data := config.DB.Preload(clause.Associations).Find(&Peminjaman)
+
+	if data.Error != nil {
+		log.Printf(data.Error.Error())
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":  http.StatusNotFound,
+			"message": "Data not found",
+		})
+
+		c.Abort()
+		return
+	}
 
 	for _, p := range Peminjaman {
 		ResponsePeminjamanDetail := []models.ResponsePeminjamanDetail{}
 
 		for _, respPeminjamanDetail := range p.PeminjamanDetail {
+			var ModelBuku models.Buku
+
+			config.DB.First(&ModelBuku, "id = ?", respPeminjamanDetail.BukuID)
+
 			ResponsePeminjamanDetail = append(ResponsePeminjamanDetail, models.ResponsePeminjamanDetail{
-				JudulBuku:     respPeminjamanDetail.Buku.Judul,
-				KategoriBuku:  respPeminjamanDetail.Buku.Kategori,
-				TahunBuku:     respPeminjamanDetail.Buku.Tahun,
-				PengarangBuku: respPeminjamanDetail.Buku.Pengarang,
-				PenerbitBuku:  respPeminjamanDetail.Buku.Penerbit,
+				JudulBuku:     ModelBuku.Judul,
+				KategoriBuku:  ModelBuku.Kategori,
+				TahunBuku:     ModelBuku.Tahun,
+				PengarangBuku: ModelBuku.Pengarang,
+				PenerbitBuku:  ModelBuku.Penerbit,
 			})
 		}
 
@@ -39,6 +54,9 @@ func GetLoan(c *gin.Context) {
 			ID:             p.ID,
 			TanggalPinjam:  p.TanggalPinjam,
 			TanggalKembali: p.TanggalKembali,
+			CodeOrder:      p.CodeOrder,
+			AnggotaID:      p.AnggotaID,
+			PetugasID:      p.PetugasID,
 			Anggota: models.ResponseAnggotaPeminjaman{
 				Name:      p.Anggota.Name,
 				Email:     p.Anggota.Email,

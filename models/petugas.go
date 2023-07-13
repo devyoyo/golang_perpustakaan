@@ -19,7 +19,6 @@ type ResponsePetugas struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
 	Nip      string `json:"nip"`
-	Password string `json:"password"`
 	Role     uint   `json:"role"`
 }
 

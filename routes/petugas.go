@@ -22,7 +22,8 @@ func GetPetugas(c *gin.Context) {
 			ID:       Petugas.ID,
 			Name:     Petugas.Name,
 			Username: Petugas.Username,
-			Password: Petugas.Password,
+			Nip:      Petugas.Nip,
+			Role:     Petugas.Role,
 		}
 
 		ResponsePetugas = append(ResponsePetugas, data)
@@ -57,7 +58,8 @@ func GetPetugasById(c *gin.Context) {
 		ID:       Petugas.ID,
 		Name:     Petugas.Name,
 		Username: Petugas.Username,
-		Password: Petugas.Password,
+		Nip:      Petugas.Nip,
+		Role:     Petugas.Role,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
